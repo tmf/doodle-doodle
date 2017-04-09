@@ -6,6 +6,7 @@ import Render from './Render';
 import Logo from './Logo';
 import Cage from './Cage';
 import ControlConstraint from './ControlConstraint';
+import DeviceGravity from './DeviceGravity';
 
 class Doodle extends React.Component {
     render() {
@@ -16,6 +17,7 @@ class Doodle extends React.Component {
                         <ControlConstraint />
                         <Cage />
                         <Logo />
+                        <DeviceGravity />
                     </Render>
                 </Physics>
             </FullScreen>
