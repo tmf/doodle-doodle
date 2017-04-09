@@ -1,10 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SvgContainer from './SvgContainer';
+
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import 'expose-members?decomp!poly-decomp';
-import Matter from 'matter-js';
-import 'pathseg';
+import {
+    Engine,
+    Bodies,
+    World,
+    Vertices,
+    Body,
+    Vector,
+    Mouse,
+    MouseConstraint,
+    Composite,
+    Events,
+} from 'matter-js/src/module/main';
+
 import { svgPathProperties } from 'svg-path-properties';
 import Logo from './Logo';
 
@@ -15,9 +27,7 @@ class Doodle extends React.Component {
     }
 
     componentDidMount() {
-        let { Engine, Bodies, World, Vertices, Body, Vector } = Matter;
-
-        this.engine = Engine.create();
+        this.engine = Engine.create({});
         this.engine.enableSleeping = true;
 
         const thickness = 1, width = 1000, height = 1000;
@@ -88,10 +98,10 @@ class Doodle extends React.Component {
 
     animationFrame() {
         const delta = 1000 / 30;
-        Matter.Engine.update(this.engine, delta);
+        Engine.update(this.engine, delta);
 
-        let bodies = Matter.Composite.allBodies(this.engine.world),
             allBodies = [].concat.apply([], bodies.map((body) => body.parts ? body.parts.slice(1) : [body])),
+        let bodies = Composite.allBodies(this.engine.world),
             entities = allBodies.map(body => {
                 return {
                     id: body.id,
