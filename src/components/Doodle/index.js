@@ -100,8 +100,8 @@ class Doodle extends React.Component {
         const delta = 1000 / 30;
         Engine.update(this.engine, delta);
 
-            allBodies = [].concat.apply([], bodies.map((body) => body.parts ? body.parts.slice(1) : [body])),
         let bodies = Composite.allBodies(this.engine.world),
+            allBodies = [].concat.apply([], bodies.map((body) => body.parts.length > 1 ? body.parts.slice(1) : [body])),
             entities = allBodies.map(body => {
                 return {
                     id: body.id,
