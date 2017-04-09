@@ -1,58 +1,91 @@
 import React from 'react';
+import { svgPathProperties } from 'svg-path-properties';
+import {
+    World,
+    Vertices,
+    Body,
+    Vector,
+    Composite,
+} from 'matter-js/src/module/main';
 
-class Logo extends React.PureComponent {
-    render(){
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import doodleSvg from '!!raw!./doodle.svg';
+
+class Logo extends React.Component {
+    static contextTypes = {
+        engine: React.PropTypes.object
+    };
+
+    componentWillMount() {
+        const { container: { innerWidth } } = this.props,
+
+            svgPaths = this.getSvgPathPropertiesFrom(doodleSvg);
+
+        const bodies = svgPaths
+            .map(({ properties }) =>
+                Array.from({ length: 4 * properties.getTotalLength() - 1 }, (_, i) => (i + 1) * 0.25)
+                    .reduce((sampled, length) => {
+
+                        const pointA = sampled[sampled.length - 1];
+                        const pointB = properties.getPointAtLength(length);
+                        const pointC = properties.getPointAtLength(length + 0.25);
+
+                        if (Math.abs(Vector.angle(pointA, pointB) - Vector.angle(pointA, pointC)) > 0.0025) {
+                            sampled.push(pointB);
+                        }
+                        return sampled;
+                    }, [properties.getPointAtLength(0)]))
+            .map((points) => points.reverse())
+            .map((points) => Vertices.create(points))
+            .map((vertices) => Vertices.scale(vertices, 10, 10, { x: 0, y: 0 }))
+            .map((vertices) => Vertices.translate(vertices, Vector.create(innerWidth, 0), -0.5))
+            .map((vertices, i) => Body.create({
+                vertices,
+                label: svgPaths[i].id,
+                position: Vertices.centre(vertices),
+            }));
+
+        const filterByGroup = (group) => (body, index) => svgPaths[index].group === group;
+
+        const letters = [
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-capital-d')) }),
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-o1')) }),
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-o2')) }),
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-d')) }),
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-l')) }),
+            Body.create({ label: 'logo', parts: bodies.filter(filterByGroup('letter-e')) }),
+        ];
+        World.add(this.context.engine.world, letters);
+    }
+
+    getSvgPathPropertiesFrom(rawSvg) {
+        const scratch = document.createElement('div');
+
+        scratch.innerHTML = rawSvg;
+        const paths = [].map.call(scratch.querySelectorAll('path'), (path) => path);
+
+        return paths.map((path) => ({
+            id: path.getAttribute('id'),
+            group: path.getAttribute('class'),
+            properties: svgPathProperties(path.getAttribute('d')),
+        }));
+    }
+
+    render() {
+        let bodies = Composite.allBodies(this.context.engine.world)
+                .filter((body) => body.label === 'logo'),
+            parts = [].concat.apply([], bodies.map((body) => body.parts.length > 1 ? body.parts.slice(1) : [body]));
+
         return (
-            <svg xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 80 18">
-                <g fill="currentColor">
-                    <path
-                        className="letter-capital-d"
-                        d="M 0 0.83398438 L 0 16.914062 L 4.2851562 13.734375 L 4.2851562 4.0117188 L 0 0.83398438 z "
-                        id="letter-capital-d-bar" />
-                    <path
-                        className="letter-capital-d"
-                        d="M 0 0.83398438 L 4.2851562 4.0117188 L 5.9433594 4.0117188 C 9.0766347 4.0117188 10.943359 5.6705208 10.943359 8.8730469 C 10.943359 12.075428 9.0766347 13.734375 5.9433594 13.734375 L 4.2851562 13.734375 L 0 16.914062 L 5.8496094 16.914062 C 11.448622 16.914062 15.365234 15.16208 15.365234 8.9414062 L 15.365234 8.8730469 L 15.365234 8.8046875 C 15.365234 2.5845946 11.448622 0.83398438 5.8496094 0.83398438 L 0 0.83398438 z "
-                        id="letter-capital-d-arc" />
-                    <path
-                        className="letter-o1"
-                        d="M 23.056641 5.0410156 C 19.094243 5.0410156 16.076172 7.3443057 16.076172 11.330078 C 16.076172 15.292476 19.094243 17.595703 23.056641 17.595703 L 23.056641 14.693359 C 21.144911 14.693359 20.361328 13.103887 20.361328 11.330078 C 20.361328 9.5328945 21.144911 7.9433594 23.056641 7.9433594 L 23.056641 5.0410156 z "
-                        id="letter-o1-left" />
-                    <path
-                        className="letter-o1"
-                        d="M 23.056641 5.0410156 L 23.056641 7.9433594 C 24.968372 7.9433594 25.753906 9.5328945 25.753906 11.330078 C 25.753906 13.103887 24.968372 14.693359 23.056641 14.693359 L 23.056641 17.595703 C 27.01904 17.595703 30.037109 15.292476 30.037109 11.330078 C 30.037109 7.3443057 27.01904 5.0410156 23.056641 5.0410156 z "
-                        id="letter-o1-right" />
-                    <path
-                        className="letter-o2"
-                        d="m 30.632812,11.330078 c 0,-3.9857723 3.01807,-6.2890624 6.980469,-6.2890624 l 0,2.9023438 c -1.912312,0 -2.695312,1.5895351 -2.695312,3.3867186 0,1.773809 0.783,3.363281 2.695312,3.363281 l 0,2.902344 c -3.962399,0 -6.980469,-2.303227 -6.980469,-6.265625"
-                        id="letter-o2-left" />
-                    <path
-                        className="letter-o2"
-                        d="m 44.59375,11.330078 c 0,3.962398 -3.018071,6.265625 -6.980469,6.265625 l 0,-2.902344 c 1.91173,0 2.695313,-1.589472 2.695313,-3.363281 0,-1.7971835 -0.783583,-3.3867186 -2.695313,-3.3867186 l 0,-2.9023438 c 3.962398,0 6.980469,2.3032901 6.980469,6.2890624 z"
-                        id="letter-o2-right" />
-
-                    <path
-                        className="letter-d"
-                        d="m 55.001953,5.4882812 -2.832031,2.4550782 c -1.911731,0 -2.697266,1.5895351 -2.697266,3.3867186 0,1.773809 0.785535,3.363281 2.697266,3.363281 l 2.832031,2.009766 c -0.733739,0.462253 -1.813013,0.892578 -2.832031,0.892578 -3.962399,0 -6.982422,-2.303227 -6.982422,-6.265625 0,-3.9857723 3.020023,-6.2890624 6.982422,-6.2890624 1.019018,0 1.972856,0.1529857 2.832031,0.4472656 z"
-                        id="letter-d-arc" />
-                    <path
-                        className="letter-d"
-                        d="m 59.150391,0.04101562 0,17.27929638 -4.148438,0 0,-0.617187 -2.832031,-2.009766 c 1.91173,0 2.693359,-1.589472 2.693359,-3.363281 0,-1.7971835 -0.781629,-3.3867186 -2.693359,-3.3867186 l 2.832031,-2.4550782 0,-5.44726558 z"
-                        id="letter-d-bar" />
-                    <path
-                        className="letter-l"
-                        d="M 60.654297 0.041015625 L 60.654297 17.320312 L 64.800781 17.320312 L 64.800781 0.041015625 L 60.654297 0.041015625 z "
-                        id="letter-l" />
-                    <path
-                        className="letter-e"
-                        d="M 72.677734 5.0410156 C 68.715771 5.0410156 65.697266 7.3443057 65.697266 11.330078 C 65.697266 15.292476 68.715771 17.595703 72.677734 17.595703 C 72.802444 17.595703 72.925069 17.594344 73.046875 17.589844 C 73.168826 17.594344 73.292903 17.595703 73.416016 17.595703 C 74.95957 17.595703 76.480314 17.36628 77.816406 16.835938 L 77.816406 13.910156 C 76.572213 14.578275 75.281409 14.832031 74.152344 14.832031 C 73.621421 14.832031 73.14534 14.786065 72.724609 14.691406 C 71.535294 14.423113 70.797104 13.751647 70.626953 12.527344 L 70.556641 10.175781 C 70.841919 8.9048751 71.642989 7.9433594 73.128906 7.9433594 L 72.861328 5.0410156 C 72.831858 5.0410156 72.803486 5.0429687 72.773438 5.0429688 C 72.741647 5.0429688 72.709964 5.0410156 72.677734 5.0410156 z "
-                        id="letter-e-left" />
-                    <path
-                        className="letter-e"
-                        d="M 72.861328 5.0410156 L 73.128906 7.9433594 C 74.614098 7.9433594 75.416474 8.9048752 75.701172 10.175781 L 70.556641 10.175781 L 70.626953 12.527344 L 79.558594 12.527344 C 79.587484 12.357193 79.609823 12.184787 79.626953 12.007812 C 79.646693 11.787865 79.658203 11.56193 79.658203 11.330078 C 79.658203 8.1474416 77.734525 6.0376608 74.941406 5.3164062 C 74.330053 5.1382704 73.639348 5.0410156 72.861328 5.0410156 z "
-                        id="letter-e-right" />
-                </g>
-            </svg>
+            <g>
+                {parts.map((part, index) => (
+                    <polygon points={part.vertices.map(vertex => `${vertex.x.toFixed(1)},${vertex.y.toFixed(1)}`).join(' ')}
+                             key={`entity-${part.id}`}
+                             stroke="currentColor"
+                             strokeWidth={1.75}
+                    />
+                ))}
+            </g>
         );
     }
 }
