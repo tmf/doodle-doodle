@@ -97,7 +97,7 @@ class Doodle extends React.Component {
     }
 
     animationFrame() {
-        const delta = 1000 / 30;
+        const delta = 1000 / 60;
         Engine.update(this.engine, delta);
 
         let bodies = Composite.allBodies(this.engine.world),
