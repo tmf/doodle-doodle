@@ -37,10 +37,10 @@ class Cage extends React.Component {
     }
 
     getCage = ({ innerWidth, innerHeight }) => [
-        Bodies.rectangle(0, -(innerHeight + 5) / 2, innerWidth, 10, { isStatic: true, label: 'box' }),
-        Bodies.rectangle(-(innerWidth + 5) / 2, 0, 10, innerHeight, { isStatic: true, label: 'box' }),
-        Bodies.rectangle((innerWidth + 5) / 2, 0, 10, innerHeight, { isStatic: true, label: 'box' }),
-        Bodies.rectangle(0, (innerHeight + 5) / 2, innerWidth, 10, { isStatic: true, label: 'box' }),
+        Bodies.rectangle(0, -(innerHeight + 1000) / 2, innerWidth, 1000, { isStatic: true, label: 'box' }),
+        Bodies.rectangle(-(innerWidth + 1000) / 2, 0, 1000, innerHeight + 2000, { isStatic: true, label: 'box' }),
+        Bodies.rectangle((innerWidth + 1000) / 2, 0, 1000, innerHeight + 2000, { isStatic: true, label: 'box' }),
+        Bodies.rectangle(0, (innerHeight + 1000) / 2, innerWidth, 1000, { isStatic: true, label: 'box' }),
     ];
 
     getCageBodies() {
