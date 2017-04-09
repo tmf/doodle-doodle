@@ -77,6 +77,20 @@ class Doodle extends React.Component {
         ];
         World.add(this.engine.world, letters);
 
+        const mouse = Mouse.create(this.mouseContainer),
+            mouseConstraint = MouseConstraint.create(this.engine, {
+                mouse: mouse,
+                constraint: {
+                    stiffness: 0.2,
+                    render: {
+                        visible: false
+                    }
+                }
+            });
+        World.add(this.engine.world, mouseConstraint);
+
+        Events.on(mouseConstraint, 'mousedown', ({ mouse: { position: { x, y } } }) => console.log(`mousedown at ${x} ${y}`));
+
         requestAnimationFrame(this.animationFrame.bind(this));
     }
 
@@ -119,15 +133,19 @@ class Doodle extends React.Component {
 
     render() {
         return (
-            <SvgContainer>
-                {this.state.entities.map((entity, index) => (
-                    <polygon points={entity.vertices.map(vertex => `${vertex.x},${vertex.y}`).join(' ')}
-                             key={`entity-${entity.id}`}
-                             stroke="currentColor"
-                             strokeWidth={1.75}
-                    />
-                ))}
-            </SvgContainer>
+            <div ref={(div) => {
+                this.mouseContainer = div;
+            }}>
+                <SvgContainer>
+                    {this.state.entities.map((entity, index) => (
+                        <polygon points={entity.vertices.map(vertex => `${vertex.x},${vertex.y}`).join(' ')}
+                                 key={`entity-${entity.id}`}
+                                 stroke="currentColor"
+                                 strokeWidth={1.75}
+                        />
+                    ))}
+                </SvgContainer>
+            </div>
         );
     }
 }
