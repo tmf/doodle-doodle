@@ -3,7 +3,7 @@ import {
     World,
     Mouse,
 } from 'matter-js/src/module/main';
-import SimpleMouseConstraint from './SimpleMouseConstraint';
+import SimpleMouseConstraint from '../Doodle/SimpleMouseConstraint';
 
 class ControlConstraint extends React.Component {
     static contextTypes = {

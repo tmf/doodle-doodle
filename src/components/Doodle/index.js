@@ -1,12 +1,9 @@
 import React from 'react';
 
 import FullScreen from './FullScreen';
-import Physics from './Physics';
-import Render from './Render';
+import { Physics, Render, ControlConstraint, DeviceGravity } from '../Matter';
 import Logo from './Logo';
 import Cage from './Cage';
-import ControlConstraint from './ControlConstraint';
-import DeviceGravity from './DeviceGravity';
 
 class Doodle extends React.Component {
     render() {
