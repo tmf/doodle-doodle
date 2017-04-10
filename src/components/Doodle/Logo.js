@@ -17,7 +17,7 @@ class Logo extends React.Component {
     };
 
     componentWillMount() {
-        const { container: { innerWidth } } = this.props,
+        const { container: { innerWidth, innerHeight } } = this.props,
 
             svgPaths = this.getSvgPathPropertiesFrom(doodleSvg);
 
@@ -38,7 +38,7 @@ class Logo extends React.Component {
             .map((points) => points.reverse())
             .map((points) => Vertices.create(points))
             .map((vertices) => Vertices.scale(vertices, 10, 10, { x: 0, y: 0 }))
-            .map((vertices) => Vertices.translate(vertices, Vector.create(innerWidth, 0), -0.5))
+            .map((vertices) => Vertices.translate(vertices, Vector.create( 4*innerWidth / 5, 2 * innerHeight / 3), -0.5))
             .map((vertices, i) => Body.create({
                 vertices,
                 label: svgPaths[i].id,
